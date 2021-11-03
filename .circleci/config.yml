@@ -1,0 +1,68 @@
+version: 2.1
+
+# to use CircleCI's dynamic configuration feature
+setup: << pipeline.parameters.run-setup >>
+
+parameters:
+  run-setup:
+    description: Whether it is a setup workflow or a continuation
+    type: boolean
+    default: true
+  tests-passed:
+    description: Whether tests passed or failed
+    type: boolean
+    default: true
+
+orbs:
+  continuation: circleci/continuation@0.2.0
+
+# our defined job, and its steps
+jobs:
+  setup:
+    parameters:
+      test_exit_code:
+        type: integer
+        default: 0
+    executor: continuation/default
+    steps:
+      - checkout
+      - run:
+          name: Run test
+          command: |
+            if ! $(exit << parameters.test_exit_code >>) > /dev/null; then
+              echo '{"run-setup": false, "tests-passed": false }' > params.json
+            else
+              echo '{"run-setup": false, "tests-passed": true }' > params.json
+            fi
+      - continuation/continue:
+          configuration_path: .circleci/continue-config.yml  # reuse this .circleci/config.yml
+          parameters: '{"run-setup": false, "tests-passed": }'
+  deploy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run: echo "Deploy done"
+
+# our single workflow, that triggers the setup job defined above
+workflows:
+  setup:
+    jobs:
+      - setup
+  auto_deploy:
+    when:
+      and:
+        - not: << pipeline.parameters.run-setup >>
+        - << pipeline.parameters.tests-passed >>
+    jobs:
+      - deploy
+  approve_then_deploy:
+    when:
+      and:
+        - not: << pipeline.parameters.run-setup >>
+        - not: << pipeline.parameters.tests-passed >>
+    jobs:
+      - approve:
+          type: approval
+      - deploy:
+          requires:
+            - approve
