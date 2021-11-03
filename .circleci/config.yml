@@ -35,7 +35,7 @@ jobs:
               echo '{"run-setup": false, "tests-passed": true }' > params.json
             fi
       - continuation/continue:
-          configuration_path: .circleci/continue-config.yml  # reuse this .circleci/config.yml
+          configuration_path: .circleci/config.yml  # reuse this .circleci/config.yml
           parameters: params.json
   deploy:
     docker:
