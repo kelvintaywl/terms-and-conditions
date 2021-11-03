@@ -16,9 +16,8 @@ parameters:
 orbs:
   continuation: circleci/continuation@0.2.0
 
-# our defined job, and its steps
 jobs:
-  setup:
+  test:
     parameters:
       test_exit_code:
         type: integer
@@ -46,8 +45,9 @@ jobs:
 # our single workflow, that triggers the setup job defined above
 workflows:
   setup:
+    when: << pipeline.parameters.run-setup >>
     jobs:
-      - setup
+      - test
   auto_deploy:
     when:
       and:
