@@ -47,7 +47,8 @@ workflows:
   setup:
     when: << pipeline.parameters.run-setup >>
     jobs:
-      - test
+      - test:
+          test_exit_code: 1
   auto_deploy:
     when:
       and:
