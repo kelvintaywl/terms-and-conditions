@@ -36,7 +36,7 @@ jobs:
             fi
       - continuation/continue:
           configuration_path: .circleci/continue-config.yml  # reuse this .circleci/config.yml
-          parameters: '{"run-setup": false, "tests-passed": }'
+          parameters: params.json
   deploy:
     docker:
       - image: cimg/base:stable
