@@ -36,6 +36,11 @@ jobs:
       - continuation/continue:
           configuration_path: .circleci/config.yml  # reuse this .circleci/config.yml
           parameters: params.json
+      - run:
+          name: Signal test results
+          command: |
+            jq -e '."tests-passed"' params.json
+            
   deploy:
     docker:
       - image: cimg/base:stable
